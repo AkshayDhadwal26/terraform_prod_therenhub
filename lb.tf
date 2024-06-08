@@ -19,95 +19,69 @@ resource "aws_security_group" "alb_sg" {
 
 }
 
-#creating frontend load balancer for prod
-resource "aws_lb" "frontend" {
-  name               = "frontend-alb"
+# Load Balancer
+resource "aws_lb" "prod_lb" {
+  name               = "prod-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = ["subnet-03e167944e31d065c", "subnet-03b8316f9222e2095"]
 
-  tags = {
-    Name = "frontend-alb"
-  }
+  enable_deletion_protection = false
+
+  depends_on = [aws_acm_certificate_validation.prod]
 }
 
-#creating target group for frontend load balancer
-resource "aws_lb_target_group" "prod-frontend" {
-  name     = "prod-frontend-target-group"
+# Target Group
+resource "aws_lb_target_group" "app_tg" {
+  name     = "prod-tg"
   port     = 80
   protocol = "HTTP"
   vpc_id   = "vpc-01c7dd971769b69f4"
 
   health_check {
     path                = "/"
-    protocol            = "HTTP"
-    port                = 80
     interval            = 30
     timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
+    matcher             = "200-299"
   }
 }
 
-#adding listner to frontend load balancer
-resource "aws_lb_listener" "prod-frontend" {
-  load_balancer_arn = aws_lb.frontend.arn
+# Listener
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.prod_lb.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.prod.arn
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app_tg.arn
+  }
+}
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.prod_lb.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prod-frontend.arn
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
   }
 }
 
-#attaching frontend target group to frontend load balancer
-resource "aws_autoscaling_attachment" "prod-frontend" {
-  lb_target_group_arn  = aws_lb_target_group.prod-frontend.arn
+# Attach the ASG to the target group
+resource "aws_autoscaling_attachment" "asg_attachment" {
   autoscaling_group_name = aws_autoscaling_group.prod.name
+  lb_target_group_arn   = aws_lb_target_group.app_tg.arn
 }
 
-
-# Creating backend load balancer
-resource "aws_lb" "backend" {
-  name               = "backend-alb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = ["subnet-03e167944e31d065c", "subnet-03b8316f9222e2095"]
-
-  tags = {
-    Name = "backend-alb"
-  }
-}
-
-# Creating target group for backend load balancer
-resource "aws_lb_target_group" "backend" {
-  name     = "backend-target-group"
-  port     = 3000
-  protocol = "HTTP"
-  vpc_id   = "vpc-01c7dd971769b69f4"
-
-  health_check {
-    path                = "/"
-    protocol            = "HTTP"
-    port                = 3000
-    interval            = 30
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-  }
-}
-
-# Adding listener to backend load balancer
-resource "aws_lb_listener" "backend" {
-  load_balancer_arn = aws_lb.backend.arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.backend.arn
-  }
-}

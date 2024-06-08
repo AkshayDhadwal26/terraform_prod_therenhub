@@ -17,7 +17,7 @@ resource "aws_launch_template" "prod_launch_template" {
   security_group_names = [aws_security_group.prod.id] 
   
   iam_instance_profile {
-    name = aws_iam_role.ecr_role.name
+    name = aws_iam_role.admin_role.name
   } 
   
   user_data = <<-EOF
@@ -52,7 +52,7 @@ services:
     image: 931623615406.dkr.ecr.ap-south-1.amazonaws.com/prod:frontend
     container_name: frontend_container
     ports:
-      - "80:80"
+      - "81:80"
 
   backend:
     image: 931623615406.dkr.ecr.ap-south-1.amazonaws.com/prod:backend
@@ -63,6 +63,12 @@ EOL
 
 # Start Docker Compose services
 docker compose -f /root/docker-compose.yaml up -d 
+
+
+#installing nginx and placing own configuration
+apt install nginx -y
+wget https://nginx-default.s3.ap-south-1.amazonaws.com/default.conf -O /etc/nginx/sites-available/default
+systemctl restart nginx
 
 
 echo "\
