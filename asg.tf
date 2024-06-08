@@ -4,7 +4,11 @@ resource "aws_autoscaling_group" "prod" {
   min_size             = 1
   vpc_zone_identifier  = ["subnet-03e167944e31d065c", "subnet-03b8316f9222e2095"]
 
-  launch_configuration = aws_launch_template.prod_launch_template.id
+  #launch_configuration = aws_launch_template.prod_launch_template.id
+  launch_template {
+    id      = aws_launch_template.prod_launch_template.id
+    #version = "$Latest"
+  }
 
   tag {
     key                 = "Name"

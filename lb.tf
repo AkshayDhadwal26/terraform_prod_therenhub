@@ -1,12 +1,19 @@
 #creating security group for load balancer
 resource "aws_security_group" "alb_sg" {
-  name        = "alb-security-group"
+  name        = "alb-prod-group"
   description = "Security group for ALB"
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   
@@ -30,6 +37,18 @@ resource "aws_lb" "prod_lb" {
   enable_deletion_protection = false
 
   depends_on = [aws_acm_certificate_validation.prod]
+}
+
+# Route53 Record
+resource "aws_route53_record" "prod_dns" {
+  zone_id = "Z04011483MWZ7MQNJAR3"
+  name    = "hostoo.online"  # Change this to your desired domain name
+  type    = "A"
+  alias {
+    name                   = aws_lb.prod_lb.dns_name
+    zone_id                = aws_lb.prod_lb.zone_id
+    evaluate_target_health = true
+  }
 }
 
 # Target Group
