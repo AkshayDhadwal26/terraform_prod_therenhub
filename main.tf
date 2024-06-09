@@ -12,17 +12,37 @@ resource "aws_launch_template" "prod_launch_template" {
   image_id               = "ami-0f58b397bc5c1f2e8"  # Specify your desired AMI ID
   key_name               = "prod-key"  # Specify the name of your EC2 key pair
   
-  security_group_names = [aws_security_group.prod.id] 
+  #security_groups	 = [aws_security_group.prod.id] 
   
   iam_instance_profile {
-    name = aws_iam_role.admin_role.name
+    name = aws_iam_instance_profile.prod_instance_profile.name
+  }
+  network_interfaces {
+    associate_public_ip_address = true
+    subnet_id                   = "subnet-03e167944e31d065c"
+    security_groups             = [aws_security_group.prod.id]
   } 
   
   user_data = base64encode(<<-EOF
     #!/bin/bash
     #installing docker
     apt-get update
-    apt install docker.io -y
+
+    # Add Docker's official GPG key:
+    sudo apt-get update
+    sudo apt-get install ca-certificates curl -y
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+    # Add the repository to Apt sources:
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get update
+    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+    snap install aws-cli --classic
     sudo aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 931623615406.dkr.ecr.ap-south-1.amazonaws.com
     sudo docker pull 931623615406.dkr.ecr.ap-south-1.amazonaws.com/prod:frontend
     sudo docker pull 931623615406.dkr.ecr.ap-south-1.amazonaws.com/prod:backend
@@ -31,11 +51,12 @@ resource "aws_launch_template" "prod_launch_template" {
     wget https://nginx-default.s3.ap-south-1.amazonaws.com/docker-compose.yml -O /root/docker-compose.yaml
 
     # Start Docker Compose services
-    docker compose -f /root/docker-compose.yaml up -d 
+    docker compose -f /root/docker-compose.yaml up -d   
 
     #installing nginx and placing own configuration
     apt install nginx -y
     wget https://nginx-default.s3.ap-south-1.amazonaws.com/default.conf -O /etc/nginx/sites-available/default
+    systemctl daemon-reload
     systemctl restart nginx
    
 
@@ -45,7 +66,7 @@ resource "aws_launch_template" "prod_launch_template" {
     sudo chmod +x /root/script.bash
 
     # Add cron job to run the script every 10 minutes
-    echo "*/10 * * * * root /root/script.bash" | sudo tee -a /etc/crontab
+    echo "*/5 * * * * root /root/script.bash" | sudo tee -a /etc/crontab
   EOF
 )
 
@@ -53,4 +74,3 @@ resource "aws_launch_template" "prod_launch_template" {
     Name = "ProdLaunchTemplate"
   }
 }
-
