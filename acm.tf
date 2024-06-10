@@ -1,6 +1,6 @@
 # ACM Certificate
 resource "aws_acm_certificate" "prod" {
-  domain_name       = "hostoo.online"
+  domain_name       = var.domain_name
   validation_method = "DNS"
 
   lifecycle {
@@ -10,7 +10,7 @@ resource "aws_acm_certificate" "prod" {
 
 # Route 53 Zone
 data "aws_route53_zone" "prod" {
-  name = "hostoo.online"
+  name = var.domain_name
 }
 
 # DNS Validation Record

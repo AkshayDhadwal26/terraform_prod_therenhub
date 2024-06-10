@@ -21,7 +21,6 @@ resource "local_file" "private_key" {
   }
 }
 
-# Optionally, you can output the key pair details
 output "key_name" {
   value = aws_key_pair.prod.key_name
 }
