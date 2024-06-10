@@ -1,5 +1,5 @@
 resource "aws_autoscaling_group" "prod" {
-  desired_capacity     = 2
+  desired_capacity     = 1
   max_size             = 3
   min_size             = 1
   vpc_zone_identifier  = var.vpc_zone_identifier
@@ -33,3 +33,14 @@ resource "aws_autoscaling_policy" "scale_in" {
   autoscaling_group_name = aws_autoscaling_group.prod.name
 }
 
+resource "null_resource" "instance_protection" {
+  count = 1
+  provisioner "local-exec" {
+    command = <<EOT
+      INSTANCE_ID=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${aws_autoscaling_group.prod.name}" --query "AutoScalingGroups[0].Instances[${count.index}].InstanceId" --output text)
+      aws autoscaling set-instance-protection --instance-ids $INSTANCE_ID --auto-scaling-group-name "${aws_autoscaling_group.prod.name}" --protected-from-scale-in
+    EOT
+  }
+
+  depends_on = [null_resource.wait_for_instances]
+}
