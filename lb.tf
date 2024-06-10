@@ -40,16 +40,16 @@ resource "aws_lb" "prod_lb" {
 }
 
 # Route53 Frontend Record
-resource "aws_route53_record" "prod_dns" {
-  zone_id = var.zone_id
-  name    = var.domain_name  # Change this to your desired domain name
-  type    = "A"
-  alias {
-    name                   = aws_lb.prod_lb.dns_name
-    zone_id                = aws_lb.prod_lb.zone_id
-    evaluate_target_health = true
-  }
-}
+#resource "aws_route53_record" "prod_dns" {
+#  zone_id = var.zone_id
+#  name    = var.domain_name  # Change this to your desired domain name
+#  type    = "A"
+#  alias {
+#    name                   = aws_lb.prod_lb.dns_name
+#    zone_id                = aws_lb.prod_lb.zone_id
+#    evaluate_target_health = true
+#  }
+#}
 
 
 # Route53 Backend Record
