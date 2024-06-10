@@ -52,7 +52,7 @@ resource "aws_route53_record" "prod_dns" {
 }
 
 
-# Route53 Frontend Record
+# Route53 Backend Record
 resource "aws_route53_record" "prod_backend_dns" {
   zone_id = var.zone_id
   name    = var.backend_domain_name  # Change this to your desired domain name
