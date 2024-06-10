@@ -32,7 +32,7 @@ resource "aws_lb" "prod_lb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = ["subnet-03e167944e31d065c", "subnet-03b8316f9222e2095"]
+  subnets            = var.vpc_zone_identifier
 
   enable_deletion_protection = false
 
@@ -41,8 +41,8 @@ resource "aws_lb" "prod_lb" {
 
 # Route53 Record
 resource "aws_route53_record" "prod_dns" {
-  zone_id = "Z04011483MWZ7MQNJAR3"
-  name    = "hostoo.online"  # Change this to your desired domain name
+  zone_id = var.zone_id
+  name    = var.domain_name  # Change this to your desired domain name
   type    = "A"
   alias {
     name                   = aws_lb.prod_lb.dns_name
@@ -56,7 +56,7 @@ resource "aws_lb_target_group" "app_tg" {
   name     = "prod-tg"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = "vpc-01c7dd971769b69f4"
+  vpc_id   = var.vpc_id
 
   health_check {
     path                = "/"

@@ -1,6 +1,6 @@
 # Define provider
 provider "aws" {
-  region = "ap-south-1"  # Specify your desired AWS region
+  region = var.region  # Specify your desired AWS region
 }
 
 # Create a launch template
@@ -8,8 +8,8 @@ resource "aws_launch_template" "prod_launch_template" {
   name_prefix   = "prod-launch-template-"
   description   = "Prod Launch Template"
   
-  instance_type          = "t2.micro"
-  image_id               = "ami-0f58b397bc5c1f2e8"  # Specify your desired AMI ID
+  instance_type          = var.instance_type
+  image_id               = var.image_id  # Specify your desired AMI ID
   key_name               = "prod-key"  # Specify the name of your EC2 key pair
   
   #security_groups	 = [aws_security_group.prod.id] 
@@ -19,7 +19,7 @@ resource "aws_launch_template" "prod_launch_template" {
   }
   network_interfaces {
     associate_public_ip_address = true
-    subnet_id                   = "subnet-03e167944e31d065c"
+    subnet_id                   = element(var.vpc_zone_identifier, 0)
     security_groups             = [aws_security_group.prod.id]
   } 
   

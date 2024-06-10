@@ -1,8 +1,8 @@
 resource "aws_autoscaling_group" "prod" {
-  desired_capacity     = 1
+  desired_capacity     = 2
   max_size             = 3
   min_size             = 1
-  vpc_zone_identifier  = ["subnet-03e167944e31d065c", "subnet-03b8316f9222e2095"]
+  vpc_zone_identifier  = var.vpc_zone_identifier
 
   #launch_configuration = aws_launch_template.prod_launch_template.id
   launch_template {
