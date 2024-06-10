@@ -39,7 +39,7 @@ resource "aws_lb" "prod_lb" {
   depends_on = [aws_acm_certificate_validation.prod]
 }
 
-# Route53 Record
+# Route53 Frontend Record
 resource "aws_route53_record" "prod_dns" {
   zone_id = var.zone_id
   name    = var.domain_name  # Change this to your desired domain name
@@ -50,6 +50,20 @@ resource "aws_route53_record" "prod_dns" {
     evaluate_target_health = true
   }
 }
+
+
+# Route53 Frontend Record
+resource "aws_route53_record" "prod_backend_dns" {
+  zone_id = var.zone_id
+  name    = var.backend_domain_name  # Change this to your desired domain name
+  type    = "A"
+  alias {
+    name                   = aws_lb.prod_lb.dns_name
+    zone_id                = aws_lb.prod_lb.zone_id
+    evaluate_target_health = true
+  }
+}
+
 
 # Target Group
 resource "aws_lb_target_group" "app_tg" {

@@ -14,13 +14,8 @@ data "aws_instances" "prod" {
   depends_on = [null_resource.wait_for_instances]
 }
 
-output "instance_public_ips" {
-  description = "Public IP addresses of the instances"
-  value       = data.aws_instances.prod.public_ips
-}
-
-output "instance_private_ips" {
-  description = "Private IP addresses of the instances"
-  value       = data.aws_instances.prod.private_ips
+output "instance_ip" {
+  description = "Elastic ip attached with instance"
+  value = aws_eip.prod.public_ip
 }
 
