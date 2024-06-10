@@ -2,9 +2,9 @@
 resource "aws_acm_certificate" "prod" {
   domain_name       = var.domain_name
   validation_method = "DNS"
-  subject_alternative_names = [
-    var.backend_domain_name
-  ]
+  #subject_alternative_names = [
+  #  var.backend_domain_name
+  #]
   lifecycle {
     create_before_destroy = true
   }
@@ -12,7 +12,7 @@ resource "aws_acm_certificate" "prod" {
 
 # Route 53 Zone
 data "aws_route53_zone" "prod" {
-  name = var.domain_name
+  name = "hostoo.online"
 }
 
 # DNS Validation Record

@@ -13,7 +13,7 @@ variable "vpc_id" {
 variable "domain_name" {
   description = "The domain name for the ACM certificate"
   type        = string
-  default     = "hostoo.online"
+  default     = "*.hostoo.online"
 }
 
 variable "backend_domain_name" {
