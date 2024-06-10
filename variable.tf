@@ -16,6 +16,13 @@ variable "domain_name" {
   default     = "hostoo.online"
 }
 
+variable "backend_domain_name" {
+  description = "The domain name for the ACM certificate"
+  type        = string
+  default     = "api.hostoo.online"
+}
+
+
 variable "vpc_zone_identifier" {
   description = "List of subnet IDs for the VPC"
   type        = list(string)

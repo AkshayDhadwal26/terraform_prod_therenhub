@@ -61,12 +61,12 @@ resource "aws_launch_template" "prod_launch_template" {
    
 
     #Creating script for regular check of updated docker image
-    wget https://nginx-default.s3.ap-south-1.amazonaws.com/script.bash -O /root/script.bash
+    #wget https://nginx-default.s3.ap-south-1.amazonaws.com/script.bash -O /root/script.bash
     # Make the script executable
-    sudo chmod +x /root/script.bash
+    #sudo chmod +x /root/script.bash
 
     # Add cron job to run the script every 10 minutes
-    echo "*/5 * * * * root /root/script.bash" | sudo tee -a /etc/crontab
+    #echo "*/5 * * * * root /root/script.bash" | sudo tee -a /etc/crontab
   EOF
 )
 
