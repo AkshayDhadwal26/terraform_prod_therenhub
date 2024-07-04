@@ -17,6 +17,15 @@ resource "aws_launch_template" "prod_launch_template" {
   iam_instance_profile {
     name = aws_iam_instance_profile.prod_instance_profile.name
   }
+
+  block_device_mappings {
+    device_name = "/dev/sda1" 
+    ebs {
+      volume_type           = "gp2"
+      volume_size           = 30
+      delete_on_termination = true
+    }
+  }
   network_interfaces {
     associate_public_ip_address = true
     subnet_id                   = element(var.vpc_zone_identifier, 0)
@@ -46,9 +55,10 @@ resource "aws_launch_template" "prod_launch_template" {
     sudo aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 931623615406.dkr.ecr.ap-south-1.amazonaws.com
     sudo docker pull 931623615406.dkr.ecr.ap-south-1.amazonaws.com/prod:frontend
     sudo docker pull 931623615406.dkr.ecr.ap-south-1.amazonaws.com/prod:backend
+    sudo docker pull 931623615406.dkr.ecr.ap-south-1.amazonaws.com/prod:webapp
 
     # Create Docker Compose file
-    wget https://nginx-default.s3.ap-south-1.amazonaws.com/docker-compose.yml -O /root/docker-compose.yaml
+    wget https://nginx-default.s3.ap-south-1.amazonaws.com/docker-compose.yaml -O /root/docker-compose.yaml
 
     # Start Docker Compose services
     docker compose -f /root/docker-compose.yaml up -d   

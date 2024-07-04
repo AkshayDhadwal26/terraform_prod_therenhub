@@ -25,8 +25,8 @@ resource "aws_security_group" "prod" {
   }
 
   ingress {
-    from_port   = 300
-    to_port     = 300
+    from_port   = 3306
+    to_port     = 3306
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]  # Allow HTTP from any IP address
   }
