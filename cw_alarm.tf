@@ -6,7 +6,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   namespace           = "AWS/EC2"
   period              = "300"
   statistic           = "Average"
-  threshold           = "50"
+  threshold           = "40"
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.prod.name

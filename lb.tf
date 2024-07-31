@@ -42,7 +42,7 @@ resource "aws_lb" "prod_lb" {
 # Route53 Frontend Record
 resource "aws_route53_record" "prod_dns" {
   zone_id = var.zone_id
-  name    = "hostoo.online"  # Change this to your desired domain name
+  name    = "therenhub.com"  # Change this to your desired domain name
   type    = "A"
   alias {
     name                   = aws_lb.prod_lb.dns_name
@@ -88,7 +88,7 @@ resource "aws_lb_listener" "https" {
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = "arn:aws:acm:ap-south-1:931623615406:certificate/62ab267d-ca92-457d-88f7-5eae53f1e6e9"
+  certificate_arn   = var.acm_certificate 
 
   default_action {
     type             = "forward"

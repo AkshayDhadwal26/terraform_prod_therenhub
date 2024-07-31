@@ -52,26 +52,32 @@ resource "aws_launch_template" "prod_launch_template" {
     sudo apt-get update
     sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
     snap install aws-cli --classic
-    sudo aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 931623615406.dkr.ecr.ap-south-1.amazonaws.com
-    sudo docker pull 931623615406.dkr.ecr.ap-south-1.amazonaws.com/prod:frontend
-    sudo docker pull 931623615406.dkr.ecr.ap-south-1.amazonaws.com/prod:backend
-    sudo docker pull 931623615406.dkr.ecr.ap-south-1.amazonaws.com/prod:webapp
+    sleep 2
+    aws configure set region us-east-1
+    aws configure set output json
+    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 438786549001.dkr.ecr.us-east-1.amazonaws.com
+    sleep2
+
+    docker pull 438786549001.dkr.ecr.us-east-1.amazonaws.com:prod-backend-latest
+    docker pull 438786549001.dkr.ecr.us-east-1.amazonaws.com:prod-frontend-latest
+    docker pull 438786549001.dkr.ecr.us-east-1.amazonaws.com:prod-webapp-latest
 
     # Create Docker Compose file
-    wget https://nginx-default.s3.ap-south-1.amazonaws.com/docker-compose.yaml -O /root/docker-compose.yaml
+    wget https://ren-ath-configurations.s3.amazonaws.com/docker-compose.yml -O /root/docker-compose.yaml
 
     # Start Docker Compose services
+    docker compose -f /root/docker-compose.yaml pull
     docker compose -f /root/docker-compose.yaml up -d   
 
     #installing nginx and placing own configuration
     apt install nginx -y
-    wget https://nginx-default.s3.ap-south-1.amazonaws.com/default.conf -O /etc/nginx/sites-available/default
+    wget https://ren-ath-configurations.s3.amazonaws.com/default.conf -O /etc/nginx/sites-available/default
     systemctl daemon-reload
     systemctl restart nginx
    
 
     #Creating script for regular check of updated docker image
-    #wget https://nginx-default.s3.ap-south-1.amazonaws.com/script.bash -O /root/script.bash
+    #wget <....> -O /root/script.bash
     # Make the script executable
     #sudo chmod +x /root/script.bash
 

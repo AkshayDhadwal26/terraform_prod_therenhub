@@ -1,7 +1,7 @@
 resource "aws_eip" "prod" {
   domain = "vpc"
   tags = {
-    Name = "ProdIP"
+    Name = "Ren-Ath-ProdIP"
   }
 }
 
